@@ -5,8 +5,16 @@ const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
 
+// ---- 重要：Render で動かすための CORS 設定 ----
+const io = new Server(server, {
+  cors: {
+    origin: "*",     // 必要に応じて URL を絞る
+    methods: ["GET", "POST"]
+  }
+});
+
+// ---- public フォルダを配信 ----
 app.use(express.static("public"));
 
 // --- 抽選済み番号を保存 ---
@@ -20,20 +28,18 @@ io.on("connection", (socket) => {
 
   // 管理者から抽選要求
   socket.on("spin", () => {
-    // 出ていない番号をフィルタ
-    const remaining = [...Array(60).keys()].map(n => n + 1)
+    const remaining = [...Array(60).keys()]
+      .map(n => n + 1)
       .filter(num => !drawnNumbers.includes(num));
 
     if (remaining.length === 0) return;
 
-    // ランダムに1つ取り出す
     const number = remaining[Math.floor(Math.random() * remaining.length)];
 
     drawnNumbers.push(number);
 
     console.log("抽選番号:", number);
 
-    // 全員に 番号+一覧 を送信
     io.emit("new-number", number);
     io.emit("update-list", drawnNumbers);
   });
@@ -46,6 +52,9 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(3000, () => {
-  console.log("http://localhost:3000 でサーバ起動");
+// ---- Render が割り当てる PORT を使用 ----
+const PORT = process.env.PORT || 3000;
+
+server.listen(PORT, () => {
+  console.log(`Server running → http://localhost:${PORT}`);
 });

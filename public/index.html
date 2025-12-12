@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Bingo System</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic&display=swap" rel="stylesheet">
+</head>
+<body>
+  <h1>ビンゴシステム</h1>
+
+  <button onclick="goAdmin()">管理者ログイン</button>
+  <button onclick="goPlayer()">参加者として参加</button>
+
+  <script>
+    function goAdmin() {
+      const pass = prompt("管理者パスワードを入力してください：");
+
+      // 超簡易パスワード（本来はもっと強化可）
+      if (pass === "admin123") {
+        window.location.href = "/admin.html";
+      } else {
+        alert("パスワードが違います");
+      }
+    }
+
+    function goPlayer() {
+      window.location.href = "/player.html";
+    }
+  </script>
+  <script src="/script.js"></script>
+
+</body>
+</html>

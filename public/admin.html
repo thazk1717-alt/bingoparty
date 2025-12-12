@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ビンゴ管理者ページ</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic&display=swap" rel="stylesheet">
+</head>
+<body>
+  <h1>管理者用ルーレット</h1>
+
+  <button id="spin">ルーレットを回す</button>
+  <button id="reset">リセット</button>
+  <audio id="sound-roulette" src="/sound/roulette.mp3"></audio>
+  <audio id="sound-decision" src="/sound/decision.mp3"></audio>
+
+  <h2>最新の番号：<span id="last"></span></h2>
+
+  <h3>出た番号一覧</h3>
+  <div id="list"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+    const socket = io();
+
+    let isSpinning = false;
+    let spinInterval;
+
+    document.getElementById("spin").onclick = () => {
+
+      if (isSpinning) return;
+      isSpinning = true;
+
+      let display = document.getElementById("last");
+
+      // 🎵 ルーレット音再生
+      playRouletteSound();
+
+      // 数字が高速で変わるアニメーション
+      spinInterval = setInterval(() => {
+        display.textContent = Math.floor(Math.random() * 75) + 1;
+      }, 25);
+
+      // 2秒後に停止
+      setTimeout(() => {
+        clearInterval(spinInterval);
+
+        // サーバから結果を取得
+        socket.emit("spin");
+
+        isSpinning = false;
+      }, 2500);
+    };
+
+    document.getElementById("reset").onclick = () => {
+      socket.emit("reset");
+    };
+
+    socket.on("new-number", (num) => {
+      document.getElementById("last").textContent = num;
+
+      // 🎵 決定音
+      playDecisionSound();
+    });
+
+    socket.on("update-list", (arr) => {
+      document.getElementById("list").textContent = arr.join(", ");
+    });
+
+    socket.on("reset-all", () => {
+      document.getElementById("last").textContent = "";
+      document.getElementById("list").textContent = "";
+    });
+  </script>
+
+  <script src="/script.js"></script>
+</body>
+</html>

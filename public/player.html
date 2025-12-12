@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ビンゴ参加者画面</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic&display=swap" rel="stylesheet">
+</head>
+<body>
+  <h1>ビンゴ結果</h1>
+
+  <h2>最新番号：<span id="number"></span></h2>
+
+  <h3>出た番号一覧</h3>
+  <div id="list"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    socket.on("new-number", (num) => {
+      document.getElementById("number").textContent = num;
+    });
+
+    socket.on("update-list", (arr) => {
+      document.getElementById("list").textContent = arr.join(", ");
+    });
+
+    socket.on("reset-all", () => {
+      document.getElementById("number").textContent = "";
+      document.getElementById("list").textContent = "";
+    });
+  </script>
+  <script src="/script.js"></script>
+</body>
+</html>

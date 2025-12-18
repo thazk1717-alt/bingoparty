@@ -10,112 +10,41 @@
 </head>
 <body>
 
-  <div class="top-bar">
-    <button onclick="location.href='/'">← メニューへ戻る</button>
-  </div>
+<h1>管理者ルーレット</h1>
 
-  <h1>管理者用ルーレット</h1>
+<div class="top-bar">
+  <button onclick="location.href='/'">← メニューへ</button>
+</div>
 
-  <button id="spin">ルーレットを回す</button>
-  <button id="reset">リセット</button>
+<button id="spin">ルーレットを回す</button>
+<button id="reset">リセット</button>
 
-  <audio id="sound-roulette" src="/sound/roulette.mp3"></audio>
-  <audio id="sound-decision" src="/sound/decision.mp3"></audio>
+<h2>最新番号：<span id="last"></span></h2>
 
-  <h2>最新の番号：<span id="last"></span></h2>
+<h3>出た番号</h3>
+<div id="list"></div>
 
-  <h3>出た番号一覧</h3>
-  <div id="list"></div>
+<hr>
 
-  <hr>
-
-  <h3>数字の範囲設定</h3>
+<h3>数字の範囲設定</h3>
+<div class="range-settings">
   <label>
-    最小値：
+    最小：
     <input type="number" id="min" value="1">
   </label>
   <label>
-    最大値：
-    <input type="number" id="max" value="75">
+    最大：
+    <input type="number" id="max">
   </label>
-  <button id="setRange">範囲を設定</button>
+  <button id="setRange" class="small">設定</button>
+</div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io();
 
-    let isSpinning = false;
-    let spinInterval;
+<audio id="sound-roulette" src="/sound/roulette.mp3"></audio>
+<audio id="sound-decision" src="/sound/decision.mp3"></audio>
 
-    const rouletteSound = document.getElementById("sound-roulette");
-    const decisionSound = document.getElementById("sound-decision");
-    let currentMin;
-    let currentMax;
+<script src="/socket.io/socket.io.js"></script>
+<script src="/script.js"></script>
 
-    // サーバから範囲情報を受信
-    socket.on("range-info", ({ min, max }) => {
-      currentMin = min;
-      currentMax = max;
-    });
-
-    // ルーレット開始
-    document.getElementById("spin").onclick = () => {
-      if (isSpinning) return;
-      isSpinning = true;
-
-      const display = document.getElementById("last");
-
-      rouletteSound.currentTime = 0;
-      rouletteSound.play();
-
-      spinInterval = setInterval(() => {
-        display.textContent = Math.floor(Math.random() * (currentMax - currentMin + 1)) + currentMin;
-
-      }, 25);
-
-      setTimeout(() => {
-        clearInterval(spinInterval);
-        rouletteSound.pause();
-        rouletteSound.currentTime = 0;
-
-        socket.emit("spin");
-        isSpinning = false;
-      }, 2500);
-    };
-
-    // リセット
-    document.getElementById("reset").onclick = () => {
-      socket.emit("reset");
-    };
-
-    // 範囲設定
-    document.getElementById("setRange").onclick = () => {
-      const min = Number(document.getElementById("min").value);
-      const max = Number(document.getElementById("max").value);
-
-      if (min >= max) {
-        alert("最小値は最大値より小さくしてください");
-        return;
-      }
-
-      socket.emit("set-range", { min, max });
-    };
-
-    // 確定番号受信
-    socket.on("new-number", (num) => {
-      document.getElementById("last").textContent = num;
-      decisionSound.currentTime = 0;
-      decisionSound.play();
-    });
-
-    socket.on("update-list", (arr) => {
-      document.getElementById("list").textContent = arr.join(", ");
-    });
-
-    socket.on("reset-all", () => {
-      document.getElementById("last").textContent = "";
-      document.getElementById("list").textContent = "";
-    });
-  </script>
 </body>
 </html>

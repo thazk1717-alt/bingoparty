@@ -44,6 +44,18 @@ io.on("connection", (socket) => {
     io.emit("update-list", drawnNumbers);
   });
 
+  // 範囲設定
+  socket.on("set-range", ({ min, max }) => {
+    minNumber = min;
+    maxNumber = max;
+    drawnNumbers = [];
+
+    io.emit("range-info", { min, max });
+    io.emit("reset-all");
+
+    console.log(`範囲変更: ${min}〜${max}`);
+  });
+
   // リセット処理
   socket.on("reset", () => {
     drawnNumbers = [];

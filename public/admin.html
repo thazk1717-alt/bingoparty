@@ -49,6 +49,14 @@
 
     const rouletteSound = document.getElementById("sound-roulette");
     const decisionSound = document.getElementById("sound-decision");
+    let currentMin;
+    let currentMax;
+
+    // サーバから範囲情報を受信
+    socket.on("range-info", ({ min, max }) => {
+      currentMin = min;
+      currentMax = max;
+    });
 
     // ルーレット開始
     document.getElementById("spin").onclick = () => {
@@ -61,7 +69,8 @@
       rouletteSound.play();
 
       spinInterval = setInterval(() => {
-        display.textContent = Math.floor(Math.random() * 75) + 1;
+        display.textContent = Math.floor(Math.random() * (currentMax - currentMin + 1)) + currentMin;
+
       }, 25);
 
       setTimeout(() => {

@@ -5,36 +5,42 @@ const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
+const io = new Server(server);
 
-// ---- 重要：Render で動かすための CORS 設定 ----
-const io = new Server(server, {
-  cors: {
-    origin: "*",     // 必要に応じて URL を絞る
-    methods: ["GET", "POST"]
-  }
-});
-
-// ---- public フォルダを配信 ----
 app.use(express.static("public"));
 
-// --- 抽選済み番号を保存 ---
+// ===== サーバ側の状態 =====
 let drawnNumbers = [];
+let minNumber;
+let maxNumber;
 
 io.on("connection", (socket) => {
   console.log("ユーザー接続:", socket.id);
 
-  // 接続した参加者へ現在の番号一覧を送る
+  // 現在の状態を送信
   socket.emit("update-list", drawnNumbers);
+  socket.emit("range-updated", {
+    min: minNumber,
+    max: maxNumber
+  });
 
-  // 管理者から抽選要求
+  // ===== 抽選 =====
   socket.on("spin", () => {
-    const remaining = [...Array(60).keys()]
-      .map(n => n + 1)
-      .filter(num => !drawnNumbers.includes(num));
+    // min〜max の範囲から、未使用の数字を作る
+    const remaining = [];
+    for (let i = minNumber; i <= maxNumber; i++) {
+      if (!drawnNumbers.includes(i)) {
+        remaining.push(i);
+      }
+    }
 
-    if (remaining.length === 0) return;
+    if (remaining.length === 0) {
+      console.log("これ以上抽選できません");
+      return;
+    }
 
-    const number = remaining[Math.floor(Math.random() * remaining.length)];
+    const number =
+      remaining[Math.floor(Math.random() * remaining.length)];
 
     drawnNumbers.push(number);
 
@@ -44,19 +50,22 @@ io.on("connection", (socket) => {
     io.emit("update-list", drawnNumbers);
   });
 
-  // 範囲設定
+  // ===== 範囲設定 =====
   socket.on("set-range", ({ min, max }) => {
-    minNumber = min;
-    maxNumber = max;
-    drawnNumbers = [];
+    minNumber = Number(min);
+    maxNumber = Number(max);
+    drawnNumbers = []; // 範囲変更時はリセット
 
-    io.emit("range-info", { min, max });
+    console.log(`範囲変更: ${minNumber}〜${maxNumber}`);
+
+    io.emit("range-updated", {
+      min: minNumber,
+      max: maxNumber
+    });
     io.emit("reset-all");
-
-    console.log(`範囲変更: ${min}〜${max}`);
   });
 
-  // リセット処理
+  // ===== リセット =====
   socket.on("reset", () => {
     drawnNumbers = [];
     io.emit("reset-all");
@@ -64,9 +73,6 @@ io.on("connection", (socket) => {
   });
 });
 
-// ---- Render が割り当てる PORT を使用 ----
-const PORT = process.env.PORT || 3000;
-
-server.listen(PORT, () => {
-  console.log(`Server running → http://localhost:${PORT}`);
+server.listen(3000, () => {
+  console.log("http://localhost:3000 でサーバ起動");
 });

@@ -19,8 +19,21 @@ body {
 ========================= */
 h1 {
   margin-top: 24px;
-  font-size: 2.4rem;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
   letter-spacing: 0.08em;
+}
+
+/* =========================
+   トップバー
+========================= */
+.top-bar {
+  text-align: left;
+  margin: 10px 12px 20px;
+}
+
+.top-bar button {
+  padding: 6px 14px;
+  font-size: 0.95rem;
 }
 
 /* =========================
@@ -28,7 +41,7 @@ h1 {
 ========================= */
 button {
   padding: 14px 28px;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: bold;
   border-radius: 999px;
   border: none;
@@ -50,26 +63,34 @@ button:active {
   transform: scale(0.95);
 }
 
+button.small {
+  padding: 6px 14px;
+  font-size: 0.9rem;
+}
+
 /* =========================
    入力欄（min / max）
 ========================= */
 input[type="number"] {
-  width: 100px;
+  width: 90px;
   padding: 10px;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   border-radius: 12px;
   border: 2px solid #ccc;
   margin: 0 6px;
   text-align: center;
 }
-.top-bar {
-  text-align: left;   /* 左寄せ */
-  margin: 10px 0 20px 0; /* 上余白10px、下余白20px */
-}
 
-.top-bar button {
-  padding: 5px 10px;
-  font-size: 16px;
+/* =========================
+   数字範囲設定
+========================= */
+.range-settings {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0;
+  flex-wrap: wrap;
 }
 
 /* =========================
@@ -79,15 +100,14 @@ input[type="number"] {
 #last {
   margin: 30px auto;
 
-  width: 220px;
-  height: 220px;
-  aspect-ratio: 1 / 1;
+  width: clamp(140px, 40vw, 220px);
+  height: clamp(140px, 40vw, 220px);
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  font-size: 6rem;
+  font-size: clamp(3rem, 10vw, 6rem);
   font-weight: bold;
 
   border-radius: 50%;
@@ -102,39 +122,75 @@ input[type="number"] {
 }
 
 /* =========================
-   出た数字
+   最新番号（参加者画面）
 ========================= */
-/* 最新番号タイトル */
 .latest-title {
   margin-top: 30px;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   letter-spacing: 0.1em;
   color: #555;
 }
 
-/* 最新番号 本体 */
 #latest-number {
-  width: 160px;
-  height: 160px;
+  width: clamp(120px, 35vw, 160px);
+  height: clamp(120px, 35vw, 160px);
   margin: 20px auto 40px;
+
   border-radius: 50%;
   background: linear-gradient(135deg, #ff9800, #ff5722);
+
   display: flex;
   justify-content: center;
   align-items: center;
+
   box-shadow: 0 12px 24px rgba(0,0,0,0.25);
   animation: pop 0.4s ease-out;
 }
 
-/* 数字 */
 #latest-number span {
-  font-size: 4.2rem;
+  font-size: clamp(2.5rem, 8vw, 4.2rem);
   font-weight: 800;
   color: #fff;
   text-shadow: 0 3px 6px rgba(0,0,0,0.3);
 }
 
-/* 出た瞬間のポップ演出 */
+/* =========================
+   出た数字一覧
+========================= */
+#list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+  gap: 6px;
+
+  max-width: 700px;
+  margin: 32px auto;
+  padding: clamp(12px, 4vw, 24px);
+
+  background: #ffffff;
+  border-radius: 20px;
+  border: 3px solid #d0d8e0;
+
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+}
+
+#list span {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: clamp(1.2rem, 4vw, 1.8rem);
+  font-weight: 800;
+
+  padding: 4px 6px;
+  border-radius: 12px;
+
+  background: #f3f6fa;
+  color: #333;
+}
+
+/* =========================
+   アニメーション
+========================= */
 @keyframes pop {
   0% {
     transform: scale(0.7);
@@ -149,53 +205,34 @@ input[type="number"] {
   }
 }
 
-/* 出た数字（1個ずつ） */
-#list span {
-  display: inline-block;      /* ← 超重要 */
-  font-size: 1.8rem;      /* ← 大きくした */
-  font-weight: 800;
-  margin: 3px 0px;            /* ← 数字の間隔 */
-  padding: 3px 8px;
+/* =========================
+   スマホ最適化
+========================= */
+@media (max-width: 600px) {
 
-  color: #333;
+  h1 {
+    margin-top: 16px;
+  }
+
+  button {
+    font-size: 1rem;
+    padding: 12px 20px;
+  }
+
+  input[type="number"] {
+    width: 80px;
+  }
+
+  #list {
+    max-width: 95%;
+  }
 }
-/* 出た数字一覧 全体のフィールド */
-#list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-  gap: 8px;
-
-  max-width: 700px;
-  margin: 32px auto;
-  padding: 24px;
-
-  background: #ffffff;
-  border-radius: 20px;
-
-  border: 3px solid #d0d8e0;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
-}
-
-
 
 /* =========================
-   アニメーション
+   PC広画面
 ========================= */
-@keyframes pop {
-  from {
-    transform: scale(0.7);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
+@media (min-width: 900px) {
+  #list {
+    max-width: 900px;
   }
 }
-/* 数字範囲設定の親要素をフレックスに */
-.range-settings {
- 
-  align-items: center;  /* 縦方向を中央揃え */
-  gap: 10px;           /* 要素間のスペース */
-  margin-bottom: 20px; /* 下の余白を追加 */
-}
-
